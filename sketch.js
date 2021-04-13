@@ -28,7 +28,6 @@ function draw() {
     for(let j = 0; j < height / gap; j++){
       if(myGrid[i][j].current() ===  "black"){
         fill(0)
-        //print(i * gap, j * gap)
         rect(i * gap, j * gap, gap, gap)
       }
       if(myGrid[i][j].current() === "blue"){
@@ -66,8 +65,8 @@ function draw() {
 function mousePressed(){
   posX = mouseX
   posY = mouseY
-  row = intdivision(posX, gap)
-  column = intdivision(posY, gap)
+  row = Math.floor(posX / gap)
+  column = Math.floor(posY / gap)
   row = int(row)
   column = int(column)
   if (mouseButton === LEFT){
@@ -97,7 +96,12 @@ function algorithm(){
     startPosition.h = distance([startPosition.x, startPosition.y]);
     
     let openList = []
-    
+    for(let i = 0; i < width / gap; i++){
+      for(let j = 0; j < width / gap; j++){
+        myGrid[i][j].h = distance([myGrid[i][j].x, myGrid[i][j].y])
+        myGrid[i][j].f = myGrid[i][j].g + myGrid[i][j].h
+      }
+    }
     openList.push(startPosition)
     let closedList = []
       while (openList.length > 0){
@@ -125,23 +129,28 @@ function algorithm(){
         openList.splice(lowPos, 1);
         closedList.push(currentPosition);
         let neighbours = neighbors(currentPosition);
+        print(neighbours)
         for(let i = 0; i < neighbours.length; i++){
           let neighbour = neighbours[i];
           if(closedList.includes(neighbour) || neighbour.colour == "black"){
             continue;
           }
-          neighbour.check()
+          //colours blocks purple indicating that it has been checked.
+          
           let gScore = currentPosition.g + 1;
           let gScoreBest = false;
           if(openList.includes(neighbour) == false){
+            
             gScoreBest = true;
             neighbour.h = distance([neighbour.x, neighbour.y]);
             openList.push(neighbour);
           }
           else if(gScore < neighbour.g){
+            neighbour.check()
             gScoreBest = true;
           }
           if(gScoreBest == true){
+            neighbour.check()
             neighbour.parent = currentPosition;
             neighbour.g = gScore;
             neighbour.f = neighbour.g + neighbour.h;
@@ -166,28 +175,20 @@ function distance(randomPosition){
 // find each neighbour of the node passed to it
 function neighbors(node){
   let ret = [];
-  let nodeX = intdivision(node.x, gap);
-  let nodeY = intdivision(node.y, gap);
+  let nodeX = Math.floor(node.x / gap);
+  let nodeY = Math.floor(node.y / gap);
   //print(nodeX, nodeY)
   //first check if the neighbour is within the canvas, if yes then add it onto the neighbour list and return it at the end
-  if(0 <= nodeX - 1 && nodeX - 1 < width / gap){
-    ret.push(myGrid[nodeX - 1][nodeY])
+  for(let i = -1; i < 2; i++){
+    for(let j = -1; j < 2; j++){
+      if(j == 0 && i == 0){
+        continue;
+      }
+      if(0 <= nodeX + i && nodeX + i < width / gap && 0 <= nodeY + j && nodeY + j < height / gap){
+        ret.push(myGrid[nodeX + i][nodeY + j]);
+      }
+    }
   }
-  if(0 <= nodeX + 1 && nodeX + 1 < width / gap) {
-      ret.push(myGrid[nodeX+1][nodeY]);
-  }
-  if(0 <= nodeY - 1 && nodeY - 1 < height / gap) {
-      ret.push(myGrid[nodeX][nodeY-1]);
-  }
-  if(0 <= nodeY + 1 && nodeY + 1 < height / gap) {
-      ret.push(myGrid[nodeX][nodeY+1]);
-  }
-  //print(ret)
   return ret;
 }
 
-// a function I made for integer division to work out the position of the mouse, there is definitely a better way, but I don't know it, so I had to implement integer division myself, since there is no integer division feature in JS according to stack overflow.
-
-function intdivision(x, gap){
-  return ((x / gap) - (x % gap) / gap)
-}
