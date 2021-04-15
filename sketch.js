@@ -95,6 +95,7 @@ function algorithm(){
     //add the heuristic distance to the start position from the final position
     startPosition.h = distance([startPosition.x, startPosition.y]);
     
+    //assign every node with their h values, might be unecessary...
     let openList = []
     for(let i = 0; i < width / gap; i++){
       for(let j = 0; j < width / gap; j++){
@@ -105,7 +106,7 @@ function algorithm(){
     openList.push(startPosition)
     let closedList = []
       while (openList.length > 0){
-        //print(openList)
+        //find what the node with the best f value is
         lowPos = 0;
         for(let i = 0; i < openList.length; i++){
           if(openList[i].f < openList[lowPos].f){
@@ -129,7 +130,6 @@ function algorithm(){
         openList.splice(lowPos, 1);
         closedList.push(currentPosition);
         let neighbours = neighbors(currentPosition);
-        print(neighbours)
         for(let i = 0; i < neighbours.length; i++){
           let neighbour = neighbours[i];
           if(closedList.includes(neighbour) || neighbour.colour == "black"){
@@ -137,18 +137,19 @@ function algorithm(){
           }
           //colours blocks purple indicating that it has been checked.
           
+          
           let gScore = currentPosition.g + 1;
           let gScoreBest = false;
+          //check if we have checked this node before
           if(openList.includes(neighbour) == false){
-            
             gScoreBest = true;
-            neighbour.h = distance([neighbour.x, neighbour.y]);
             openList.push(neighbour);
           }
+          //if we haven't and there is a better score, than change the score of the neighbour
           else if(gScore < neighbour.g){
-            neighbour.check()
             gScoreBest = true;
           }
+          //the current best path
           if(gScoreBest == true){
             neighbour.check()
             neighbour.parent = currentPosition;
@@ -162,13 +163,14 @@ function algorithm(){
   return [];
 }
 
-//this is the euclidean distance of the node passed to it, and the final node, e.g. the heuristic, I prefer the euclidean to the manhatten distance, since I believe that it makes it more accurate.
+//this is the euclidean distance of the node passed to it, and the final node, e.g. the heuristic, I prefer the euclidean to the manhattan distance, since I believe that it makes it more accurate.
 function distance(randomPosition){
-  startX = randomPosition[0] * gap;
-  startY = randomPosition[1] * gap;
-  finalX = endPoint * gap;
-  finalY = endPoint * gap;
-  heuristic = ((finalX - startX) ** 2 + (finalY - startY) ** 2) ** 1/2;
+  startX = randomPosition[0];
+  startY = randomPosition[1];
+  finalX = endPosition.x;
+  finalY = endPosition.y;
+  heuristic = ((finalX - startX) ** 2 + (finalY - startY) ** 2);
+  heuristic = heuristic ** (1 / 2)
   return heuristic;
 }
 
@@ -177,7 +179,6 @@ function neighbors(node){
   let ret = [];
   let nodeX = Math.floor(node.x / gap);
   let nodeY = Math.floor(node.y / gap);
-  //print(nodeX, nodeY)
   //first check if the neighbour is within the canvas, if yes then add it onto the neighbour list and return it at the end
   for(let i = -1; i < 2; i++){
     for(let j = -1; j < 2; j++){
