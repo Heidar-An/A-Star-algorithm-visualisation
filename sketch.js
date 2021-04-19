@@ -8,6 +8,7 @@ let startPoint = false;
 let endPoint = false;
 let startPosition;
 let endPosition;
+let released = false;
 
 //make every single square in the canvas an object of the class "points"
 function setup() {
@@ -20,6 +21,12 @@ function setup() {
   }
 }
 
+//if the letter c is pressed, the board resets.
+function keyTyped(){
+  if (key === "c") {
+    setup()
+  }
+}
 // this draws the lines, and colours the squares in depending on what they are, e.g. barricade, end position, start position, path, checked...
 function draw() {
   background(255);
@@ -61,19 +68,28 @@ function draw() {
   }
 }
 
-//if the mouse is pressed, the row and column of the square pressed is found, if it's a left mouse click then the colour changes from white to black or black to white, else the square becomes the inital square / final square
-function mousePressed(){
+//as mouse is being dragged the point either becomes a white point to black point, or vice versa.
+function mouseDragged(){
+    posX = mouseX
+    posY = mouseY
+    row = Math.floor(posX / gap)
+    column = Math.floor(posY / gap)
+    newposX = pmouseX
+    newposY = pmouseY;
+    if (posX != newposX && posY != newposY){
+      row = int(row)
+      column = int(column)
+      myGrid[row][column].change()
+    }
+}
+//if the mouse is oouble clicked, the row and column of the square pressed is found, then if it's the first time this has happened then the square is the intial point, if second, the end point, else, doesn't do anything
+
+function doubleClicked(){
   posX = mouseX
   posY = mouseY
   row = Math.floor(posX / gap)
   column = Math.floor(posY / gap)
-  row = int(row)
-  column = int(column)
-  if (mouseButton === LEFT){
-    myGrid[row][column].change()
-  }
-  if(mouseButton === RIGHT){
-    if(first === 0){
+  if(first === 0){
       myGrid[row][column].initial()
       startPoint = true;
       startPosition = myGrid[row][column];
@@ -85,9 +101,7 @@ function mousePressed(){
     }
     //this makes sure that after first is higher than 1, there can't be multiple final or start positions
     first ++
-  }
 }
-
 //the actual a star algorithm
 function algorithm(){
   //check if the start and final position have been plotted
@@ -192,4 +206,3 @@ function neighbors(node){
   }
   return ret;
 }
-
